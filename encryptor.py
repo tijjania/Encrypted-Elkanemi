@@ -33,16 +33,65 @@ def decrypt_message(encrypted_message, key):
         return None
 
 
+def encrypt_file(file_path, key):
+    path = Path(file_path)
+
+    if not path.exists():
+        print("File not found.")
+        return
+
+    data = path.read_bytes()
+    cipher = Fernet(key)
+    encrypted_data = cipher.encrypt(data)
+
+    output_path = Path(str(path) + ".encrypted")
+    output_path.write_bytes(encrypted_data)
+
+    print(f"File encrypted successfully:")
+    print(output_path)
+
+
+def decrypt_file(file_path, key):
+    path = Path(file_path)
+
+    if not path.exists():
+        print("Encrypted file not found.")
+        return
+
+    try:
+        encrypted_data = path.read_bytes()
+
+        cipher = Fernet(key)
+        decrypted_data = cipher.decrypt(encrypted_data)
+
+        if path.name.endswith(".encrypted"):
+            output_name = path.name[:-10]
+        else:
+            output_name = path.name + ".decrypted"
+
+        output_path = path.parent / output_name
+        output_path.write_bytes(decrypted_data)
+
+        print("File decrypted successfully:")
+        print(output_path)
+
+    except Exception:
+        print("Unable to decrypt the file.")
+        print("Make sure you are using the correct encryption key.")
+
+
 def main():
-    print("=" * 40)
-    print("      ENCRYPTED ELKANEMI v1.0")
-    print("=" * 40)
+    print("=" * 45)
+    print("       ENCRYPTED ELKANEMI v2.0")
+    print("=" * 45)
 
     while True:
         print("\n1. Generate encryption key")
         print("2. Encrypt message")
         print("3. Decrypt message")
-        print("4. Exit")
+        print("4. Encrypt file")
+        print("5. Decrypt file")
+        print("6. Exit")
 
         choice = input("\nChoose an option: ")
 
@@ -73,11 +122,25 @@ def main():
                     print(decrypted)
 
         elif choice == "4":
+            key = load_key()
+
+            if key:
+                file_path = input("Enter the file path: ")
+                encrypt_file(file_path, key)
+
+        elif choice == "5":
+            key = load_key()
+
+            if key:
+                file_path = input("Enter the encrypted file path: ")
+                decrypt_file(file_path, key)
+
+        elif choice == "6":
             print("Goodbye!")
             break
 
         else:
-            print("Invalid option. Please choose 1-4.")
+            print("Invalid option. Please choose 1-6.")
 
 
 if __name__ == "__main__":
